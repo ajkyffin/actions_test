@@ -1,7 +1,7 @@
 name: Release Build
 on: 
   push:
-    tags:
+    tags: '*'
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         run: echo tag_name=`basename ${{ github.ref }}` >> $GITHUB_ENV
 
       - name: Create tarball
-        run:  
+        run: |
           mv build scigateway-${{ env.tag_name }}
           tar -czf scigateway-${{ env.tag_name }}.tar.gz scigateway-${{ env.tag_name }}
 
