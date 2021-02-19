@@ -32,7 +32,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ./scigateway-${{ env.tag_name }}.tar.gz
-          release_name: Release ${{ env.tag_name }}
+          release: Release ${{ env.tag_name }}
           tag: ${{ env.tag_name }}
           prerelease: ${{ env.tag_name == 'prerelease' }}
           draft: false
