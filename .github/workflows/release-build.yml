@@ -26,32 +26,13 @@ jobs:
           mv build scigateway-${{ env.tag_name }}
           tar -czf scigateway-${{ env.tag_name }}.tar.gz scigateway-${{ env.tag_name }}
 
-      - name: Update tag
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: ${{ env.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ env.tag_name == 'prerelease' }}
-
-      - name: Create Release
+      - name: Create/update Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        uses: johnwbyrd/update-release@v1
         with:
-          tag_name: ${{ env.tag_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./scigateway-${{ env.tag_name }}.tar.gz
           release_name: Release ${{ env.tag_name }}
-          draft: false
+          tag: ${{ env.tag_name }}
           prerelease: ${{ env.tag_name == 'prerelease' }}
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./scigateway-${{ env.tag_name }}.tar.gz
-          asset_name: scigateway-${{ env.tag_name }}.tar.gz
-          asset_content_type: application/octet-stream
+          draft: false
