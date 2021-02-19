@@ -1,7 +1,8 @@
 name: Release Build
 on: 
   push:
-    tags: '*'
+    branches: master
+    tags-ignore: prerelease
 
 jobs:
   build:
@@ -12,12 +13,26 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Determine tag name
-        run: echo tag_name=`basename ${{ github.ref }}` >> $GITHUB_ENV
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/master" ]
+          then
+            echo tag_name=prerelease >> $GITHUB_ENV
+          else
+            echo tag_name=`basename ${{ github.ref }}` >> $GITHUB_ENV
+          fi
 
       - name: Create tarball
         run: |
           mv build scigateway-${{ env.tag_name }}
           tar -czf scigateway-${{ env.tag_name }}.tar.gz scigateway-${{ env.tag_name }}
+
+      - name: Update tag
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: ${{ env.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ env.tag_name == 'prerelease' }}
 
       - name: Create Release
         id: create_release
@@ -25,10 +40,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ env.tag_name }}
           release_name: Release ${{ env.tag_name }}
           draft: false
-          prerelease: false
+          prerelease: ${{ env.tag_name == 'prerelease' }}
 
       - name: Upload Release Asset
         id: upload-release-asset
