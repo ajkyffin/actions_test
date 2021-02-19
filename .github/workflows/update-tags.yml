@@ -1,0 +1,28 @@
+name: Update Tags
+on: 
+  push:
+    branches: master
+    tags-ignore:
+      - prerelease
+      - latest
+
+jobs:
+  build:
+    name: Update Tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine tag name
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/master" ]
+          then
+            echo tag_name=prerelease >> $GITHUB_ENV
+          else
+            echo tag_name=latest >> $GITHUB_ENV
+          fi
+
+      - name: Update tag
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: ${{ env.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
